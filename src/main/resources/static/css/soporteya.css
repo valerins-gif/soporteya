@@ -1,0 +1,12 @@
+/* SoporteYa · colores de la marca */
+:root {
+  --sy-azul: #1d3557;
+  --sy-turquesa: #2a9d8f;
+  --sy-ambar: #e9c46a;
+  --sy-rojo: #e76f51;
+}
+
+.portada {
+  background: linear-gradient(135deg, var(--sy-azul), var(--sy-turquesa));
+  color: #fff;
+}
