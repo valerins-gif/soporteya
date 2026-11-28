@@ -11,10 +11,5 @@ DB_PASSWORD=su_clave ./mvnw spring-boot:run
 
 Abra http://localhost:8080
 
-## Equipo
-
-| Integrante | Rol en Scrum | Módulo |
-|---|---|---|
-| (nombre) | Dueño del producto | Tickets |
-| (nombre) | Scrum Master | Tablero técnico |
-| (nombre) | Desarrollo | Administración |
+## Autor
+| Valerins Tovar Zuñiga | valerins-gif | 3230489 |
