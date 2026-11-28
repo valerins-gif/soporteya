@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <!-- Piezas comunes de SoporteYa. Cada página las incluye con th:replace. -->
 
 <head th:fragment="head(titulo)">
@@ -11,7 +12,7 @@
 </head>
 
 <body>
-  <!-- activo: la opción del menú que se resalta. El menú cambia según el rol de «yo». -->
+  <!-- activo: la opción del menú que se resalta. sec:authorize muestra cada opción solo al rol que puede usarla. -->
   <nav th:fragment="menu(activo)" class="navbar navbar-expand-lg navbar-dark navbar-sy">
     <div class="container">
       <a class="navbar-brand fw-bold" th:href="@{/}">SoporteYa</a>
@@ -20,32 +21,37 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="menu">
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-auto" sec:authorize="isAuthenticated()">
           <li class="nav-item">
             <a class="nav-link" th:href="@{/tickets}" th:classappend="${activo == 'tickets'} ? 'active'">Mis tickets</a>
           </li>
-          <li class="nav-item" th:if="${yo.rol.name() != 'SOLICITANTE'}">
+          <li class="nav-item" sec:authorize="hasAnyRole('TECNICO', 'COORDINADOR')">
             <a class="nav-link" th:href="@{/tablero}" th:classappend="${activo == 'tablero'} ? 'active'">Tablero</a>
           </li>
-          <li class="nav-item" th:if="${yo.rol.name() == 'COORDINADOR'}">
+          <li class="nav-item" sec:authorize="hasRole('COORDINADOR')">
             <a class="nav-link" th:href="@{/admin/categorias}" th:classappend="${activo == 'categorias'} ? 'active'">Categorías</a>
           </li>
-          <li class="nav-item" th:if="${yo.rol.name() == 'COORDINADOR'}">
+          <li class="nav-item" sec:authorize="hasRole('COORDINADOR')">
             <a class="nav-link" th:href="@{/admin/usuarios}" th:classappend="${activo == 'usuarios'} ? 'active'">Usuarios</a>
           </li>
-          <li class="nav-item" th:if="${yo.rol.name() == 'COORDINADOR'}">
+          <li class="nav-item" sec:authorize="hasRole('COORDINADOR')">
             <a class="nav-link" th:href="@{/admin/indicadores}" th:classappend="${activo == 'indicadores'} ? 'active'">Indicadores</a>
           </li>
         </ul>
-        <!-- SOLO UNIDAD 2: «actuar como» reemplaza al login. En la Unidad 3 se cambia por el usuario real. -->
-        <form th:action="@{/demo/actuar-como}" method="post" class="d-flex gap-2 align-items-center">
-          <label for="actuarComo" class="text-white-50 small text-nowrap">Actuar como</label>
-          <select id="actuarComo" name="email" class="form-select form-select-sm">
-            <option th:each="u : ${usuariosDemo}" th:value="${u.email}" th:selected="${u.email == yo.email}"
-                    th:text="|${u.nombreCompleto} · ${u.rol.etiqueta}|">Ana Pérez · Solicitante</option>
-          </select>
-          <button type="submit" class="btn btn-sm btn-outline-light">Cambiar</button>
-        </form>
+        <!-- Con sesión: nombre, rol y salir. Cerrar sesión es un POST (lleva el código CSRF). -->
+        <div class="d-flex align-items-center gap-3 ms-auto" sec:authorize="isAuthenticated()">
+          <span class="navbar-text small text-white">
+            <b th:text="${yo.nombreCompleto}">Ana Pérez</b> · <span th:text="${yo.rol.etiqueta}">Solicitante</span>
+          </span>
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-sm btn-outline-light">Salir</button>
+          </form>
+        </div>
+        <!-- Sin sesión -->
+        <div class="d-flex gap-2 ms-auto" sec:authorize="isAnonymous()">
+          <a class="btn btn-sm btn-light" th:href="@{/login}">Ingresar</a>
+          <a class="btn btn-sm btn-outline-light" th:href="@{/registro}">Registrarse</a>
+        </div>
       </div>
     </div>
   </nav>

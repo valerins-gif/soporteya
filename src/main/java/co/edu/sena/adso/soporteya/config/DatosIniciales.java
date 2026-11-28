@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +29,15 @@ public class DatosIniciales implements CommandLineRunner {
     private final CategoriaRepository categorias;
     private final UsuarioRepository usuarios;
     private final TicketRepository tickets;
+    private final PasswordEncoder encoder;
 
     public DatosIniciales(AreaRepository areas, CategoriaRepository categorias,
-                          UsuarioRepository usuarios, TicketRepository tickets) {
+                          UsuarioRepository usuarios, TicketRepository tickets, PasswordEncoder encoder) {
         this.areas = areas;
         this.categorias = categorias;
         this.usuarios = usuarios;
         this.tickets = tickets;
+        this.encoder = encoder;
     }
 
     @Override
@@ -66,7 +69,11 @@ public class DatosIniciales implements CommandLineRunner {
         Usuario ana = new Usuario("Ana Pérez", "ana.perez@soporteya.co", Rol.SOLICITANTE, contabilidad);
         Usuario jorge = new Usuario("Jorge Herrera", "jorge.herrera@soporteya.co", Rol.SOLICITANTE, comercial);
         Usuario paola = new Usuario("Paola Martínez", "paola.martinez@soporteya.co", Rol.SOLICITANTE, talento);
-        usuarios.saveAll(List.of(laura, carlos, diana, mateo, ana, jorge, paola));
+        // Unidad 3 · contraseña de prueba para todos, guardada como hash BCrypt
+        String hash = encoder.encode("Soporte2026");
+        List<Usuario> todos = List.of(laura, carlos, diana, mateo, ana, jorge, paola);
+        todos.forEach(u -> u.setPassword(hash));
+        usuarios.saveAll(todos);
 
         Ticket t1 = new Ticket("El computador no enciende",
                 "Desde esta mañana el equipo de escritorio no prende. La luz del botón no se enciende.",

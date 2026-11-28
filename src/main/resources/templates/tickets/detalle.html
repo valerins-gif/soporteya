@@ -4,7 +4,7 @@
 <body>
   <nav th:replace="~{fragmentos :: menu('tickets')}"></nav>
 
-  <!-- Variables de ayuda: ¿quién soy frente a este ticket? -->
+  <!-- Variables de ayuda: ¿quién soy frente a este ticket? El servicio ya verificó que puedo verlo. -->
   <main class="container hoja my-4"
         th:with="soySolicitante=${yo.email == t.solicitanteEmail},
                  soyTecnico=${yo.email == t.tecnicoEmail},

@@ -32,6 +32,10 @@ public class UsuarioForm {
 
     private Set<Long> especialidades = new HashSet<>();
 
+    // Unidad 3 · obligatoria al crear; si se deja vacía al editar, se conserva la actual
+    @Size(max = 72, message = "Máximo 72 caracteres")
+    private String password;
+
     public static UsuarioForm desde(Usuario u) {
         UsuarioForm f = new UsuarioForm();
         f.id = u.getId();
@@ -85,6 +89,14 @@ public class UsuarioForm {
 
     public void setAreaId(Long areaId) {
         this.areaId = areaId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Set<Long> getEspecialidades() {

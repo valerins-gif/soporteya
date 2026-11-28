@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragmentos :: head('Mesa de ayuda')}"></head>
 <body>
   <nav th:replace="~{fragmentos :: menu('inicio')}"></nav>
@@ -7,14 +8,15 @@
   <header class="portada py-5">
     <div class="container">
       <p class="text-uppercase small mb-2">Mesa de ayuda de TI</p>
-      <h1 class="display-5 fw-bold">Hola, <span th:text="${yo.nombreCompleto}">Ana</span></h1>
+      <h1 class="display-5 fw-bold" sec:authorize="isAuthenticated()">Hola, <span th:text="${yo.nombreCompleto}">Ana</span></h1>
+      <h1 class="display-5 fw-bold" sec:authorize="isAnonymous()">SoporteYa</h1>
       <p class="lead mb-4">Reporte la falla, siga su ticket y sepa quién lo está atendiendo.</p>
       <a class="btn btn-light btn-lg" th:href="@{/tickets/nuevo}">Reportar una falla</a>
-      <a class="btn btn-outline-light btn-lg" th:if="${yo.rol.name() != 'SOLICITANTE'}" th:href="@{/tablero}">Ir al tablero</a>
+      <a class="btn btn-outline-light btn-lg" sec:authorize="hasAnyRole('TECNICO', 'COORDINADOR')" th:href="@{/tablero}">Ir al tablero</a>
     </div>
   </header>
 
-  <main class="container my-5">
+  <main class="container my-5" sec:authorize="isAuthenticated()">
     <h2 class="h5 mb-3">La mesa de ayuda hoy</h2>
     <div class="row g-3">
       <div class="col-6 col-md" th:each="c : ${conteos}">

@@ -2,6 +2,7 @@ package co.edu.sena.adso.soporteya.service;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ public class CategoriaService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('COORDINADOR')")
     public CategoriaDTO guardar(CategoriaForm form) {
         String nombre = form.getNombre().trim();
         boolean repetida = form.esNuevo()
@@ -53,6 +55,7 @@ public class CategoriaService {
 
     // No se borra: tiene tickets. Se desactiva y deja de aparecer en los formularios.
     @Transactional
+    @PreAuthorize("hasRole('COORDINADOR')")
     public CategoriaDTO cambiarEstado(Long id) {
         Categoria categoria = buscar(id);
         categoria.setActiva(!categoria.isActiva());
