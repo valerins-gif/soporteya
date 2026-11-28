@@ -9,6 +9,9 @@
   <title th:text="${titulo} + ' · SoporteYa'">SoporteYa</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" th:href="@{/css/soporteya.css}">
+  <!-- Unidad 4 · el código CSRF queda disponible para el JavaScript que hace POST con fetch -->
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
 </head>
 
 <body>
@@ -23,7 +26,9 @@
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto" sec:authorize="isAuthenticated()">
           <li class="nav-item">
-            <a class="nav-link" th:href="@{/tickets}" th:classappend="${activo == 'tickets'} ? 'active'">Mis tickets</a>
+            <a class="nav-link" th:href="@{/tickets}" th:classappend="${activo == 'tickets'} ? 'active'">Mis tickets
+              <!-- Unidad 4 · lo llena soporteya.js con fetch -->
+              <span id="contadorPendientes" class="badge rounded-pill text-bg-warning" hidden></span></a>
           </li>
           <li class="nav-item" sec:authorize="hasAnyRole('TECNICO', 'COORDINADOR')">
             <a class="nav-link" th:href="@{/tablero}" th:classappend="${activo == 'tablero'} ? 'active'">Tablero</a>
@@ -100,6 +105,9 @@
       SoporteYa · Mesa de ayuda de TI · Proyecto guía ADSO · SENA
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Unidad 4 · funciones comunes de JavaScript, solo con sesión iniciada -->
+    <div id="avisos" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+    <script sec:authorize="isAuthenticated()" th:src="@{/js/soporteya.js}"></script>
   </th:block>
 </body>
 </html>

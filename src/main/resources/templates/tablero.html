@@ -1,14 +1,20 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragmentos :: head('Tablero')}"></head>
 <body>
   <nav th:replace="~{fragmentos :: menu('tablero')}"></nav>
 
   <main class="container-fluid px-lg-5 my-4">
     <div th:replace="~{fragmentos :: mensajes}"></div>
-    <h1 class="h3 mb-3">Tablero de la mesa de ayuda</h1>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h1 class="h3 mb-0">Tablero de la mesa de ayuda</h1>
+      <!-- Unidad 4 · lo actualiza tablero.js -->
+      <small class="text-muted" id="estadoTablero" aria-live="polite">Se actualiza solo cada 20 segundos</small>
+    </div>
 
-    <div class="row g-3">
+    <!-- data-tecnico: el JavaScript sabe si debe dibujar el botón «Tomar» -->
+    <div class="row g-3" id="tablero" th:data-tecnico="${yo.rol.name() == 'TECNICO'}">
       <!-- La misma columna tres veces, con distintos datos: el fragmento «columna» de fragmentos.html -->
       <div class="col-lg-4" th:replace="~{fragmentos :: columna('Abiertos', ${tablero.abiertos}, true)}"></div>
       <div class="col-lg-4" th:replace="~{fragmentos :: columna('En curso', ${tablero.enCurso}, false)}"></div>
@@ -18,5 +24,6 @@
 
 
   <th:block th:replace="~{fragmentos :: pie}"></th:block>
+  <script th:src="@{/js/tablero.js}"></script>
 </body>
 </html>

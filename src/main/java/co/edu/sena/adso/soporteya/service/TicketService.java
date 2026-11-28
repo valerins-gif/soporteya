@@ -52,10 +52,16 @@ public class TicketService {
                 .map(TicketResumenDTO::from);
     }
 
+    @PreAuthorize("hasAnyRole('TECNICO', 'COORDINADOR')")
     public List<TicketResumenDTO> pendientes() {
         return tickets.findByEstadoInOrderByFechaLimiteAsc(EstadoTicket.pendientes()).stream()
                 .map(TicketResumenDTO::from)
                 .toList();
+    }
+
+    // Unidad 4 · cuántos tickets pendientes tiene el usuario (para el contador del menú)
+    public long contarMisPendientes(String email) {
+        return tickets.countBySolicitanteEmailAndEstadoIn(email, EstadoTicket.pendientes());
     }
 
     // Unidad 2 · las tres columnas del tablero
