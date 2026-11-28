@@ -10,3 +10,61 @@
   background: linear-gradient(135deg, var(--sy-azul), var(--sy-turquesa));
   color: #fff;
 }
+
+/* Unidad 2 · diseño común */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+main {
+  flex: 1;
+}
+
+.navbar-sy {
+  background: var(--sy-azul);
+}
+
+.navbar-sy .nav-link.active {
+  border-bottom: 3px solid var(--sy-ambar);
+}
+
+.hoja {
+  max-width: 820px;
+}
+
+/* Un color por estado y por prioridad: se usan con el fragmento «estado» y «prioridad» */
+.estado-ABIERTO { background: #3a86ff; }
+.estado-EN_CURSO { background: var(--sy-ambar); color: #3d2e00; }
+.estado-RESUELTO { background: var(--sy-turquesa); }
+.estado-CERRADO { background: #6c757d; }
+.estado-CANCELADO { background: #adb5bd; color: #212529; }
+.prioridad-BAJA { background: #e9ecef; color: #495057; }
+.prioridad-MEDIA { background: #cfe2ff; color: #084298; }
+.prioridad-ALTA { background: #ffe5d0; color: #9a3412; }
+.prioridad-CRITICA { background: var(--sy-rojo); }
+
+.columna {
+  background: #eef1f5;
+  border-radius: .75rem;
+  padding: .75rem;
+  min-height: 12rem;
+}
+
+.tarjeta-ticket.vencido {
+  border-left: 5px solid var(--sy-rojo);
+}
+
+.comentario.interno {
+  background: #fff8e1;
+  border-left: 4px solid var(--sy-ambar);
+}
+
+.comentario.sistema {
+  background: transparent;
+  border: 0;
+  color: #6c757d;
+  font-size: .9rem;
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Usuarios')}"></head>
+<body>
+  <nav th:replace="~{fragmentos :: menu('usuarios')}"></nav>
+
+  <main class="container my-4">
+    <div th:replace="~{fragmentos :: mensajes}"></div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h3 mb-0">Usuarios</h1>
+      <a class="btn btn-primary" th:href="@{/admin/usuarios/nuevo}">Nuevo usuario</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle bg-white">
+        <thead class="table-light"><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Área</th><th>Especialidades</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="u : ${usuarios}" th:classappend="${!u.activo} ? 'text-muted'">
+            <td class="fw-semibold" th:text="${u.nombreCompleto}">Carlos Ruiz</td>
+            <td th:text="${u.email}">carlos@soporteya.co</td>
+            <td th:text="${u.rol.etiqueta}">Técnico</td>
+            <td th:text="${u.area}">Tecnología</td>
+            <td class="small" th:text="${u.especialidades}">Hardware, Impresoras</td>
+            <td class="text-end text-nowrap">
+              <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/usuarios/{id}/editar(id=${u.id})}">Editar</a>
+              <form th:action="@{/admin/usuarios/{id}/estado(id=${u.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-secondary" th:text="${u.activo} ? 'Desactivar' : 'Activar'">Desactivar</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <th:block th:replace="~{fragmentos :: pie}"></th:block>
+</body>
+</html>

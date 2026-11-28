@@ -3,17 +3,22 @@ package co.edu.sena.adso.soporteya.service;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import co.edu.sena.adso.soporteya.dto.ComentarioDTO;
 import co.edu.sena.adso.soporteya.dto.ConteoEstadoDTO;
 import co.edu.sena.adso.soporteya.dto.IndicadorTecnicoDTO;
 import co.edu.sena.adso.soporteya.dto.NuevoTicket;
+import co.edu.sena.adso.soporteya.dto.TableroDTO;
+import co.edu.sena.adso.soporteya.dto.TicketDetalleDTO;
 import co.edu.sena.adso.soporteya.dto.TicketResumenDTO;
 import co.edu.sena.adso.soporteya.model.Categoria;
+import co.edu.sena.adso.soporteya.model.Comentario;
 import co.edu.sena.adso.soporteya.model.EstadoTicket;
 import co.edu.sena.adso.soporteya.model.Rol;
 import co.edu.sena.adso.soporteya.model.Ticket;
@@ -49,6 +54,25 @@ public class TicketService {
         return tickets.findByEstadoInOrderByFechaLimiteAsc(EstadoTicket.pendientes()).stream()
                 .map(TicketResumenDTO::from)
                 .toList();
+    }
+
+    // Unidad 2 · las tres columnas del tablero
+    public TableroDTO tablero() {
+        List<TicketResumenDTO> todos = tickets.findByEstadoInOrderByFechaLimiteAsc(
+                        Set.of(EstadoTicket.ABIERTO, EstadoTicket.EN_CURSO, EstadoTicket.RESUELTO)).stream()
+                .map(TicketResumenDTO::from)
+                .toList();
+        return new TableroDTO(
+                todos.stream().filter(t -> t.estado() == EstadoTicket.ABIERTO).toList(),
+                todos.stream().filter(t -> t.estado() == EstadoTicket.EN_CURSO).toList(),
+                todos.stream().filter(t -> t.estado() == EstadoTicket.RESUELTO).toList());
+    }
+
+    // Unidad 2 · la página de un ticket con sus comentarios
+    public TicketDetalleDTO detalle(Long id) {
+        Ticket ticket = buscar(id);
+        List<ComentarioDTO> comentarios = ticket.getComentarios().stream().map(ComentarioDTO::from).toList();
+        return TicketDetalleDTO.from(ticket, comentarios);
     }
 
     public List<ConteoEstadoDTO> conteoPorEstado() {
@@ -140,6 +164,18 @@ public class TicketService {
         Ticket ticket = delSolicitante(ticketId, emailSolicitante);
         transicion(ticket, EstadoTicket.CANCELADO, ticket.getSolicitante(), "Cancelado por el solicitante");
         return TicketResumenDTO.from(ticket);
+    }
+
+    // Unidad 2 · comentar. Solo técnicos y coordinación pueden dejar notas internas.
+    @Transactional
+    public void comentar(Long ticketId, String email, String texto, boolean interno) {
+        Ticket ticket = buscar(ticketId);
+        Usuario autor = usuario(email);
+        if (ticket.getEstado().esFinal()) {
+            throw new NegocioException("texto", "El ticket ya está " + ticket.getEstado().getEtiqueta().toLowerCase());
+        }
+        boolean esInterno = interno && autor.getRol() != Rol.SOLICITANTE;
+        ticket.agregarComentario(new Comentario(texto.trim(), autor, esInterno));
     }
 
     // ---------- ayudas ----------

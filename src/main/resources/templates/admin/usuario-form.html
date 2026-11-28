@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Usuario')}"></head>
+<body>
+  <nav th:replace="~{fragmentos :: menu('usuarios')}"></nav>
+
+  <main class="container hoja my-4">
+    <h1 class="h3 mb-4" th:text="${usuario.esNuevo()} ? 'Nuevo usuario' : 'Editar usuario'">Nuevo usuario</h1>
+
+    <form th:action="@{/admin/usuarios}" th:object="${usuario}" method="post" novalidate class="card card-body shadow-sm">
+      <input type="hidden" th:field="*{id}">
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="nombreCompleto" class="form-label">Nombre completo</label>
+          <input type="text" th:field="*{nombreCompleto}" class="form-control" th:errorclass="is-invalid">
+          <div class="invalid-feedback" th:errors="*{nombreCompleto}">Error</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="email" class="form-label">Correo</label>
+          <input type="email" th:field="*{email}" class="form-control" th:errorclass="is-invalid">
+          <div class="invalid-feedback" th:errors="*{email}">Error</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="rol" class="form-label">Rol</label>
+          <select th:field="*{rol}" class="form-select" th:errorclass="is-invalid">
+            <option th:each="r : ${roles}" th:value="${r}" th:text="${r.etiqueta}">Solicitante</option>
+          </select>
+          <div class="invalid-feedback" th:errors="*{rol}">Error</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="areaId" class="form-label">Área</label>
+          <select th:field="*{areaId}" class="form-select" th:errorclass="is-invalid">
+            <option value="">Elija el área…</option>
+            <option th:each="a : ${areas}" th:value="${a.id}" th:text="${a.texto}">Contabilidad</option>
+          </select>
+          <div class="invalid-feedback" th:errors="*{areaId}">Error</div>
+        </div>
+      </div>
+
+      <!-- Muchos a muchos: una casilla por categoría. th:field marca las que ya tiene. -->
+      <fieldset class="mb-3">
+        <legend class="form-label fs-6">Especialidades <span class="text-muted small">(solo técnicos)</span></legend>
+        <div class="form-check form-check-inline" th:each="c : ${categorias}">
+          <input type="checkbox" class="form-check-input" th:field="*{especialidades}" th:value="${c.id}">
+          <label class="form-check-label" th:for="${#ids.prev('especialidades')}" th:text="${c.texto}">Hardware</label>
+        </div>
+        <div class="text-danger small" th:if="${#fields.hasErrors('especialidades')}" th:errors="*{especialidades}">Error</div>
+      </fieldset>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a class="btn btn-outline-secondary" th:href="@{/admin/usuarios}">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <th:block th:replace="~{fragmentos :: pie}"></th:block>
+</body>
+</html>

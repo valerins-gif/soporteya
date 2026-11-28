@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head(${t.codigo})}"></head>
+<body>
+  <nav th:replace="~{fragmentos :: menu('tickets')}"></nav>
+
+  <!-- Variables de ayuda: ¿quién soy frente a este ticket? -->
+  <main class="container hoja my-4"
+        th:with="soySolicitante=${yo.email == t.solicitanteEmail},
+                 soyTecnico=${yo.email == t.tecnicoEmail},
+                 soyPersonal=${yo.rol.name() != 'SOLICITANTE'}">
+    <div th:replace="~{fragmentos :: mensajes}"></div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+      <div>
+        <span class="text-muted" th:text="${t.codigo}">SY-00001</span>
+        <h1 class="h3" th:text="${t.asunto}">El computador no enciende</h1>
+      </div>
+      <div>
+        <span th:replace="~{fragmentos :: estado(${t.estado})}"></span>
+        <span th:replace="~{fragmentos :: prioridad(${t.prioridad})}"></span>
+        <span th:if="${t.vencido}" class="badge text-bg-danger">Vencido</span>
+      </div>
+    </div>
+
+    <div class="card card-body mb-3">
+      <p class="mb-3" style="white-space: pre-line" th:text="${t.descripcion}">Descripción</p>
+      <dl class="row small mb-0">
+        <dt class="col-sm-4">Solicitante</dt><dd class="col-sm-8" th:text="|${t.solicitante} · ${t.area}|">Ana</dd>
+        <dt class="col-sm-4">Categoría</dt><dd class="col-sm-8" th:text="${t.categoria}">Hardware</dd>
+        <dt class="col-sm-4">Técnico</dt><dd class="col-sm-8" th:text="${t.tecnico} ?: 'Sin asignar'">Carlos</dd>
+        <dt class="col-sm-4">Creado</dt><dd class="col-sm-8" th:text="${#temporals.format(t.fechaCreacion, 'd MMM yyyy, h:mm a')}">fecha</dd>
+        <dt class="col-sm-4">Fecha límite</dt><dd class="col-sm-8" th:text="${#temporals.format(t.fechaLimite, 'd MMM yyyy, h:mm a')}">fecha</dd>
+      </dl>
+    </div>
+
+    <!-- Acciones del solicitante -->
+    <div class="d-flex flex-wrap gap-2 mb-3" th:if="${soySolicitante}">
+      <form th:if="${t.estado.name() == 'RESUELTO'}" th:action="@{/tickets/{id}/cerrar(id=${t.id})}" method="post">
+        <button type="submit" class="btn btn-success">Confirmar que quedó resuelto</button>
+      </form>
+      <form th:if="${t.estado.name() == 'ABIERTO'}" th:action="@{/tickets/{id}/cancelar(id=${t.id})}" method="post">
+        <button type="submit" class="btn btn-outline-secondary">Cancelar el ticket</button>
+      </form>
+    </div>
+
+    <!-- Reabrir: el solicitante dice que no quedó bien -->
+    <form th:if="${soySolicitante and t.estado.name() == 'RESUELTO'}" th:action="@{/tickets/{id}/reabrir(id=${t.id})}"
+          th:object="${reapertura}" method="post" novalidate class="card card-body mb-3">
+      <label for="reaperturaTexto" class="form-label fw-semibold">¿No quedó bien? Cuéntenos qué pasa</label>
+      <textarea id="reaperturaTexto" th:field="*{texto}" rows="2" class="form-control" th:errorclass="is-invalid"></textarea>
+      <div class="invalid-feedback" th:errors="*{texto}">Error</div>
+      <button type="submit" class="btn btn-outline-danger mt-2 align-self-start">Reabrir</button>
+    </form>
+
+    <!-- Resolver: solo el técnico asignado -->
+    <form th:if="${soyTecnico and t.estado.name() == 'EN_CURSO'}" th:action="@{/tickets/{id}/resolver(id=${t.id})}"
+          th:object="${resolucion}" method="post" novalidate class="card card-body mb-3 border-success">
+      <label for="resolucionTexto" class="form-label fw-semibold">Solución aplicada</label>
+      <textarea id="resolucionTexto" th:field="*{texto}" rows="3" class="form-control" th:errorclass="is-invalid"></textarea>
+      <div class="invalid-feedback" th:errors="*{texto}">Error</div>
+      <button type="submit" class="btn btn-success mt-2 align-self-start">Marcar como resuelto</button>
+    </form>
+
+    <h2 class="h5 mt-4">Seguimiento</h2>
+    <div class="vstack gap-2 mb-3">
+      <div class="card card-body comentario py-2" th:each="c : ${t.comentarios}"
+           th:classappend="${c.sistema} ? 'sistema' : (${c.interno} ? 'interno' : '')">
+        <div class="small text-muted">
+          <b th:text="${c.autor}">Carlos Ruiz</b> · <span th:text="${c.rol}">Técnico</span> ·
+          <span th:text="${#temporals.format(c.fecha, 'd MMM, h:mm a')}">fecha</span>
+          <span th:if="${c.interno}" class="badge text-bg-warning">Nota interna</span>
+        </div>
+        <div style="white-space: pre-line" th:text="${c.texto}">Comentario</div>
+      </div>
+    </div>
+
+    <!-- Comentar -->
+    <form th:unless="${t.estado.esFinal()}" th:action="@{/tickets/{id}/comentarios(id=${t.id})}"
+          th:object="${comentario}" method="post" novalidate class="card card-body">
+      <label for="comentarioTexto" class="form-label fw-semibold">Agregar un comentario</label>
+      <textarea id="comentarioTexto" th:field="*{texto}" rows="3" class="form-control" th:errorclass="is-invalid"></textarea>
+      <div class="invalid-feedback" th:errors="*{texto}">Error</div>
+      <div class="form-check mt-2" th:if="${soyPersonal}">
+        <input type="checkbox" th:field="*{interno}" class="form-check-input">
+        <label class="form-check-label" th:for="${#ids.prev('interno')}">Nota interna (no la ve el solicitante)</label>
+      </div>
+      <button type="submit" class="btn btn-primary mt-2 align-self-start">Comentar</button>
+    </form>
+  </main>
+
+  <th:block th:replace="~{fragmentos :: pie}"></th:block>
+</body>
+</html>

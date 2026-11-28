@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Tablero')}"></head>
+<body>
+  <nav th:replace="~{fragmentos :: menu('tablero')}"></nav>
+
+  <main class="container-fluid px-lg-5 my-4">
+    <div th:replace="~{fragmentos :: mensajes}"></div>
+    <h1 class="h3 mb-3">Tablero de la mesa de ayuda</h1>
+
+    <div class="row g-3">
+      <!-- La misma columna tres veces, con distintos datos: el fragmento «columna» de fragmentos.html -->
+      <div class="col-lg-4" th:replace="~{fragmentos :: columna('Abiertos', ${tablero.abiertos}, true)}"></div>
+      <div class="col-lg-4" th:replace="~{fragmentos :: columna('En curso', ${tablero.enCurso}, false)}"></div>
+      <div class="col-lg-4" th:replace="~{fragmentos :: columna('Resueltos sin confirmar', ${tablero.resueltos}, false)}"></div>
+    </div>
+  </main>
+
+
+  <th:block th:replace="~{fragmentos :: pie}"></th:block>
+</body>
+</html>

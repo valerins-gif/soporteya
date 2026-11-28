@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Categorías')}"></head>
+<body>
+  <nav th:replace="~{fragmentos :: menu('categorias')}"></nav>
+
+  <main class="container my-4">
+    <div th:replace="~{fragmentos :: mensajes}"></div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h3 mb-0">Categorías</h1>
+      <a class="btn btn-primary" th:href="@{/admin/categorias/nueva}">Nueva categoría</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle bg-white">
+        <thead class="table-light"><tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="c : ${categorias}" th:classappend="${!c.activa} ? 'text-muted'">
+            <td class="fw-semibold" th:text="${c.nombre}">Hardware</td>
+            <td th:text="${c.descripcion}">Descripción</td>
+            <td><span class="badge" th:classappend="${c.activa} ? 'text-bg-success' : 'text-bg-secondary'"
+                      th:text="${c.activa} ? 'Activa' : 'Inactiva'">Activa</span></td>
+            <td class="text-end text-nowrap">
+              <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/categorias/{id}/editar(id=${c.id})}">Editar</a>
+              <form th:action="@{/admin/categorias/{id}/estado(id=${c.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-secondary" th:text="${c.activa} ? 'Desactivar' : 'Activar'">Desactivar</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <th:block th:replace="~{fragmentos :: pie}"></th:block>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Indicadores')}"></head>
+<body>
+  <nav th:replace="~{fragmentos :: menu('indicadores')}"></nav>
+
+  <main class="container my-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h1 class="h3 mb-0">Indicadores</h1>
+      <!-- Formulario GET: solo elige el mes, no guarda nada -->
+      <form th:action="@{/admin/indicadores}" method="get" class="d-flex gap-2">
+        <label for="mes" class="visually-hidden">Mes</label>
+        <input type="month" id="mes" name="mes" class="form-control" th:value="${mes}">
+        <button type="submit" class="btn btn-outline-primary">Ver</button>
+      </form>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md" th:each="c : ${conteos}">
+        <div class="card card-body text-center">
+          <div class="display-6 fw-bold" th:text="${c.cantidad}">3</div>
+          <span th:replace="~{fragmentos :: estado(${c.estado})}"></span>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="h5">Cumplimiento por técnico · <span th:text="${mes}">2026-12</span></h2>
+    <p class="text-muted" th:if="${#lists.isEmpty(indicadores)}">No hay tickets resueltos en este mes.</p>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(indicadores)}">
+      <table class="table align-middle bg-white">
+        <thead class="table-light"><tr><th>Técnico</th><th class="text-center">Resueltos</th><th class="text-center">Fuera de tiempo</th><th style="width: 35%">Cumplimiento</th></tr></thead>
+        <tbody>
+          <tr th:each="i : ${indicadores}">
+            <td th:text="${i.tecnico}">Carlos Ruiz</td>
+            <td class="text-center" th:text="${i.resueltos}">5</td>
+            <td class="text-center" th:text="${i.fueraDeTiempo}">1</td>
+            <td>
+              <div class="progress" role="progressbar" th:aria-valuenow="${i.cumplimiento()}" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" th:style="'width: ' + ${i.cumplimiento()} + '%'"
+                     th:classappend="${i.cumplimiento() < 80} ? 'bg-danger' : 'bg-success'"
+                     th:text="${i.cumplimiento()} + '%'">80%</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h5 mt-4">Tickets vencidos</h2>
+    <p class="text-muted" th:if="${#lists.isEmpty(vencidos)}">Ningún ticket pendiente ha pasado su fecha límite.</p>
+    <ul class="list-group" th:unless="${#lists.isEmpty(vencidos)}">
+      <li class="list-group-item d-flex justify-content-between" th:each="t : ${vencidos}">
+        <a th:href="@{/tickets/{id}(id=${t.id})}" th:text="|${t.codigo} · ${t.asunto}|">SY-00001 · Asunto</a>
+        <span class="text-danger small" th:text="${#temporals.format(t.fechaLimite, 'd MMM, h:mm a')}">fecha</span>
+      </li>
+    </ul>
+  </main>
+
+  <th:block th:replace="~{fragmentos :: pie}"></th:block>
+</body>
+</html>

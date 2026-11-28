@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!-- Piezas comunes de SoporteYa. Cada página las incluye con th:replace. -->
+
+<head th:fragment="head(titulo)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${titulo} + ' · SoporteYa'">SoporteYa</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" th:href="@{/css/soporteya.css}">
+</head>
+
+<body>
+  <!-- activo: la opción del menú que se resalta. El menú cambia según el rol de «yo». -->
+  <nav th:fragment="menu(activo)" class="navbar navbar-expand-lg navbar-dark navbar-sy">
+    <div class="container">
+      <a class="navbar-brand fw-bold" th:href="@{/}">SoporteYa</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
+              aria-controls="menu" aria-expanded="false" aria-label="Abrir el menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/tickets}" th:classappend="${activo == 'tickets'} ? 'active'">Mis tickets</a>
+          </li>
+          <li class="nav-item" th:if="${yo.rol.name() != 'SOLICITANTE'}">
+            <a class="nav-link" th:href="@{/tablero}" th:classappend="${activo == 'tablero'} ? 'active'">Tablero</a>
+          </li>
+          <li class="nav-item" th:if="${yo.rol.name() == 'COORDINADOR'}">
+            <a class="nav-link" th:href="@{/admin/categorias}" th:classappend="${activo == 'categorias'} ? 'active'">Categorías</a>
+          </li>
+          <li class="nav-item" th:if="${yo.rol.name() == 'COORDINADOR'}">
+            <a class="nav-link" th:href="@{/admin/usuarios}" th:classappend="${activo == 'usuarios'} ? 'active'">Usuarios</a>
+          </li>
+          <li class="nav-item" th:if="${yo.rol.name() == 'COORDINADOR'}">
+            <a class="nav-link" th:href="@{/admin/indicadores}" th:classappend="${activo == 'indicadores'} ? 'active'">Indicadores</a>
+          </li>
+        </ul>
+        <!-- SOLO UNIDAD 2: «actuar como» reemplaza al login. En la Unidad 3 se cambia por el usuario real. -->
+        <form th:action="@{/demo/actuar-como}" method="post" class="d-flex gap-2 align-items-center">
+          <label for="actuarComo" class="text-white-50 small text-nowrap">Actuar como</label>
+          <select id="actuarComo" name="email" class="form-select form-select-sm">
+            <option th:each="u : ${usuariosDemo}" th:value="${u.email}" th:selected="${u.email == yo.email}"
+                    th:text="|${u.nombreCompleto} · ${u.rol.etiqueta}|">Ana Pérez · Solicitante</option>
+          </select>
+          <button type="submit" class="btn btn-sm btn-outline-light">Cambiar</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mensajes «flash»: llegan después de un redirect y duran una sola petición -->
+  <div th:fragment="mensajes">
+    <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${ok}">
+      <span th:text="${ok}">Guardado</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">Error</div>
+  </div>
+
+  <!-- Insignias con parámetro: el color sale de la clase CSS estado-… o prioridad-… -->
+  <span th:fragment="estado(e)" th:class="|badge estado-${e.name()}|" th:text="${e.etiqueta}">Abierto</span>
+  <span th:fragment="prioridad(p)" th:class="|badge prioridad-${p.name()}|" th:text="${p.etiqueta}">Alta</span>
+
+  <!-- Una columna del tablero: título, lista de tickets y si se muestra el botón «Tomar» -->
+  <div class="col-lg-4" th:fragment="columna(titulo, lista, sePuedeTomar)">
+    <div class="columna">
+      <h2 class="h6 d-flex justify-content-between">
+        <span th:text="${titulo}">Abiertos</span>
+        <span class="badge text-bg-secondary" th:text="${#lists.size(lista)}">3</span>
+      </h2>
+      <p class="small text-muted" th:if="${#lists.isEmpty(lista)}">Nada por aquí.</p>
+      <div class="card card-body tarjeta-ticket mb-2 py-2" th:each="t : ${lista}" th:classappend="${t.vencido} ? 'vencido'">
+        <div class="d-flex justify-content-between small">
+          <a th:href="@{/tickets/{id}(id=${t.id})}" th:text="${t.codigo}">SY-00001</a>
+          <span th:replace="~{fragmentos :: prioridad(${t.prioridad})}"></span>
+        </div>
+        <div class="fw-semibold" th:text="${t.asunto}">Asunto</div>
+        <div class="small text-muted" th:text="|${t.categoria} · ${t.solicitante}|">Hardware · Ana</div>
+        <div class="small" th:classappend="${t.vencido} ? 'text-danger fw-semibold' : 'text-muted'"
+             th:text="'Límite: ' + ${#temporals.format(t.fechaLimite, 'd MMM, h:mm a')}">Límite</div>
+        <div class="small" th:if="${t.tecnico}" th:text="'Técnico: ' + ${t.tecnico}">Técnico</div>
+        <form th:if="${sePuedeTomar and yo.rol.name() == 'TECNICO'}"
+              th:action="@{/tablero/{id}/tomar(id=${t.id})}" method="post" class="mt-2">
+          <button type="submit" class="btn btn-sm btn-primary">Tomar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <th:block th:fragment="pie">
+    <footer class="text-center text-muted small py-4 border-top mt-5">
+      SoporteYa · Mesa de ayuda de TI · Proyecto guía ADSO · SENA
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </th:block>
+</body>
+</html>
